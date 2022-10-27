@@ -9,8 +9,8 @@ const getOneWorkout = () => {
   return;
 };
 
-const createNewWorkout = () => {
-  return;
+const createNewWorkout = (workout) => {
+  return workout;
 };
 
 const updateOneWorkout = () => {
