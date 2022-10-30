@@ -31,9 +31,11 @@ const createNewWorkout = (req, res) => {
   };
 
   const createdWorkout = workoutService.createNewWorkout(newWorkout);
+  if (createNewWorkout) {
+    res.status(201).send({ status: "Error", data: "Workout already exists " });
+    return;
+  }
   res.status(201).send({ status: "OK", data: createdWorkout });
-  // console.log(req.body);
-  // res.send("Create a new workout");
 };
 
 const updateOneWorkout = (req, res) => {

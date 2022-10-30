@@ -5,11 +5,14 @@ const getAllWorkouts = () => {
   return DB.workouts;
 };
 
-const compareWorkouts = (workout, newWorkout) =>
-  workout.name === newWorkout.name;
+const compareWorkouts = (workout, newWorkout) => {
+  return workout.name === newWorkout.name;
+};
 
 const createNewWorkout = (newWorkout) => {
-  const isAlreadyAdded = DB.workouts.findIndex(compareWorkouts) > -1;
+  const isAlreadyAdded =
+    DB.workouts.findIndex((workout) => compareWorkouts(workout, newWorkout)) >
+    -1;
   if (isAlreadyAdded) {
     return;
   }
