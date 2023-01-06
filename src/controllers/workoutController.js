@@ -2,36 +2,39 @@ const workoutService = require("../services/workoutService");
 
 const getAllWorkouts = (req, res) => {
   const allWorkouts = workoutService.getAllWorkouts();
-  res.send(allWorkouts);
+  res.send({ status: "OK", data: allWorkouts });
 };
 
 const getOneWorkout = (req, res) => {
-  const workout = workoutService.getOneWorkout();
-  res.send("Get an existing workout");
+  const {
+    params: { workoutId },
+  } = req;
+  const workout = workoutService.getOneWorkout(workoutId);
+  if (workout) {
+    res.send({ status: "201", data: workout });
+    return;
+  }
+  res.send({ status: "404", data: "Workout does not exist" });
 };
 
 const createNewWorkout = (req, res) => {
-  const { body } = req;
-  if (
-    !body.name ||
-    !body.mode ||
-    !body.equipment ||
-    !body.exercises ||
-    !body.trainerTips
-  ) {
+  const {
+    body: { name: name, mode, equipment, exercises, trainerTips },
+  } = req;
+  if (!name || !mode || !equipment || !exercises || !trainerTips) {
     res.status(400).send({ status: "ERROR", errorMessage: "Client error" });
+    return;
   }
-
   const newWorkout = {
-    name: body.name,
-    mode: body.mode,
-    quipment: body.equipment,
-    exercises: body.exercises,
-    trainerTips: body.trainerTips,
+    name,
+    mode,
+    equipment,
+    exercises,
+    trainerTips,
   };
-
+  console.log(newWorkout);
   const createdWorkout = workoutService.createNewWorkout(newWorkout);
-  if (createNewWorkout) {
+  if (!createdWorkout) {
     res.status(201).send({ status: "Error", data: "Workout already exists " });
     return;
   }
@@ -39,13 +42,28 @@ const createNewWorkout = (req, res) => {
 };
 
 const updateOneWorkout = (req, res) => {
-  const updatedWorkout = workoutService.updateOneWorkout();
-  res.send("Update an existing workout");
+  const {
+    body,
+    params: { workoutId },
+  } = req;
+  if (!workoutId) {
+    return;
+  }
+  // console.log(req.params.workoutId, workoutId, body);
+  const updatedWorkout = workoutService.updateOneWorkout(workoutId, body);
+  res.send({ status: "OK", data: updatedWorkout });
 };
 
-const deleteOneWorkout = (req, res) => {
-  const deletedWorkout = workoutService.deleteOneWorkout();
-  res.send("Delete an existing workout");
+const deleteWorkout = (req, res) => {
+  const {
+    params: { workoutId: workoutId },
+  } = req;
+
+  const deletedWorkout = workoutService.deleteWorkout(workoutId);
+  if (deletedWorkout) {
+    res.status(201).send({ status: "OK", data: deletedWorkout });
+  }
+  res.send({ status: "404", data: "Workout does not exist" });
 };
 
 module.exports = {
@@ -53,5 +71,5 @@ module.exports = {
   getOneWorkout,
   createNewWorkout,
   updateOneWorkout,
-  deleteOneWorkout,
+  deleteWorkout,
 };
