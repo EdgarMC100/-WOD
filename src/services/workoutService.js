@@ -36,13 +36,21 @@ const createNewWorkout = (workout) => {
 };
 
 const updateOneWorkout = (workoutId, changes) => {
-  const updatedWorkout = workoutDA.updateOneWorkout(workoutId, changes);
-  return updatedWorkout;
+  try {
+    const updatedWorkout = workoutDA.updateOneWorkout(workoutId, changes);
+    return updatedWorkout;
+  } catch (error) {
+    throw error;
+  }
 };
 
 const deleteWorkout = (workoutId) => {
-  const workoutDeleted = workoutDA.deleteWorkout(workoutId);
-  return workoutDeleted;
+  try {
+    const workoutDeleted = workoutDA.deleteWorkout(workoutId);
+    return workoutDeleted;
+  } catch (error) {
+    throw error;
+  }
 };
 
 module.exports = {

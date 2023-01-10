@@ -42,31 +42,25 @@ const createNewWorkout = (newWorkout) => {
     saveToDatabase(DB);
     return newWorkout;
   } catch (error) {
-    throw { status: 500, message: error?.message || error };
+    throw { status: error?.status || 500, message: error?.message || error };
   }
 };
 
 const deleteWorkout = (id) => {
-  console.log(DB.workouts);
-  console.log(id);
-  const workoutsFiltered = DB.workouts.filter((workout) => workout.id !== id);
-  if (workoutsFiltered.length > 0) {
-    setTimeout(() => {
-      const newDB = { workouts: workoutsFiltered };
-      saveToDatabase(newDB);
-    }, 0);
-    return DB.workouts.find((workout) => workout.id === id);
+  try {
+    const indexForDeletion = DB.workouts.findIndex(
+      (workout) => workout.id === id
+    );
+    let isExists = indexForDeletion > -1;
+    if (isExists) {
+      DB.workouts.splice(indexForDeletion, 1);
+      saveToDatabase(DB);
+      return `Workout with id ${id} was deleted succesfully`;
+    }
+    throw { status: 404, message: `Can't find workout with the id '${id}'` };
+  } catch (error) {
+    throw error;
   }
-  //or
-  // const indexForDeletion = DB.workouts.findIndex(
-  //   (workout) => workout.id === id
-  // );
-  // if (indexForDeletion === -1) {
-  //   return;
-  // }
-  // DB.workouts.splice(indexForDeletion, 1)
-  //
-  return;
 };
 
 const updateOneWorkout = (workoutId, changes) => {
@@ -75,16 +69,24 @@ const updateOneWorkout = (workoutId, changes) => {
   );
 
   if (indexForUpdate === -1) {
-    return;
+    throw {
+      status: 404,
+      message: `Workout it was not find it with the id ${workoutId}`,
+    };
   }
   const updatedWorkout = {
     ...DB.workouts[indexForUpdate],
     ...changes,
     updatedAt: new Date().toLocaleString("en-US", { timeZone: "UTC" }),
   };
-  DB.workouts[indexForUpdate] = updatedWorkout;
-  saveToDatabase(DB);
-  return updatedWorkout;
+
+  try {
+    DB.workouts[indexForUpdate] = updatedWorkout;
+    saveToDatabase(DB);
+    return updatedWorkout;
+  } catch (error) {
+    throw { status: error?.status || 500, message: error?.message || error };
+  }
 };
 
 module.exports = {

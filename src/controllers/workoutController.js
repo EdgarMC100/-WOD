@@ -1,15 +1,11 @@
 const workoutService = require("../services/workoutService");
 const { body, validationResult } = require("express-validator");
-const getAllWorkouts = (req, res) => {
+const getAllWorkouts = (req, res, next) => {
   try {
     const allWorkouts = workoutService.getAllWorkouts();
     res.send({ status: "OK", data: allWorkouts });
   } catch (error) {
-    res
-      // .status((error && error.status) || 500)
-      .status(error?.status || 500)
-      //or                             { error: error && error.message || error}
-      .send({ status: "FAILED", data: { error: error?.message || error } }); //Optional chaining
+    next(error);
   }
 };
 
@@ -22,14 +18,10 @@ const getOneWorkout = (req, res, next) => {
     res.status(200).send({ status: "OK", data: workout });
   } catch (error) {
     next(error);
-
-    // res
-    //   .status(error?.status || 500) //optional chaning
-    //   .send({ status: "FAILED", data: (error && error.message) || error });
   }
 };
 
-const createNewWorkout = (req, res) => {
+const createNewWorkout = (req, res, next) => {
   const {
     body: { name: name, mode, equipment, exercises, trainerTips },
   } = req;
@@ -54,13 +46,11 @@ const createNewWorkout = (req, res) => {
     const createdWorkout = workoutService.createNewWorkout(newWorkout);
     res.status(201).send({ status: "OK", data: createdWorkout });
   } catch (error) {
-    res
-      .status(error?.status || 500)
-      .send({ status: "FAILED", data: { error: error?.message || error } });
+    next(error);
   }
 };
 
-const updateOneWorkout = (req, res) => {
+const updateOneWorkout = (req, res, next) => {
   //Implementing express-validator
   const {
     body,
@@ -77,11 +67,15 @@ const updateOneWorkout = (req, res) => {
       .send({ status: 400, error: "An payload is required for this request" });
   }
   // console.log(req.params.workoutId, workoutId, body);
-  const updatedWorkout = workoutService.updateOneWorkout(workoutId, body);
-  res.send({ status: "OK", data: updatedWorkout });
+  try {
+    const updatedWorkout = workoutService.updateOneWorkout(workoutId, body);
+    res.send({ status: "OK", data: updatedWorkout });
+  } catch (error) {
+    next(error);
+  }
 };
 
-const deleteWorkout = (req, res) => {
+const deleteWorkout = (req, res, next) => {
   const {
     params: { workoutId: workoutId },
   } = req;
@@ -95,11 +89,8 @@ const deleteWorkout = (req, res) => {
     const deletedWorkout = workoutService.deleteWorkout(workoutId);
     res.status(201).send({ status: "OK", data: deletedWorkout });
   } catch (error) {
-    res
-      .status(error?.status || 500)
-      .send({ status: "FAILED", data: { error: error?.message || error } });
+    next(error);
   }
-  res.send({ status: "404", data: "Workout does not exist" });
 };
 
 module.exports = {
