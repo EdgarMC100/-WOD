@@ -2,25 +2,48 @@ const DB = require("./db.json");
 const { saveToDatabase } = require("./utils");
 
 const getAllWorkouts = () => {
-  return DB.workouts;
+  try {
+    return DB.workouts;
+  } catch (error) {
+    throw { status: 404, message: error.message };
+  }
 };
 
 const compareWorkouts = (workout, newWorkout) => {
   return workout.name === newWorkout.name;
 };
 const getOneWorkout = (id) => {
-  return DB.workouts.find((workout) => workout.id == id);
+  const workout = DB.workouts.find((workout) => workout.id == id);
+  if (!workout) {
+    throw { status: 404, message: `Workout with the id: ${id} not found` };
+  }
+  return workout;
 };
+
+/*
+  A little downside of just throwing is that we don't get a stack trace. 
+  But normally this error throwing would be handled by a 
+  third party library of our choice (for example Mongoose if
+  you use a MongoDB database). But for the purposes of this tutorial
+  this should be fine.
+*/
 const createNewWorkout = (newWorkout) => {
   const isAlreadyAdded =
     DB.workouts.findIndex((workout) => compareWorkouts(workout, newWorkout)) >
     -1;
   if (isAlreadyAdded) {
-    return;
+    throw {
+      status: 400,
+      message: `Workout with the name '${newWorkout.name}' already exists`,
+    };
   }
-  DB.workouts.push(newWorkout);
-  saveToDatabase(DB);
-  return newWorkout;
+  try {
+    DB.workouts.push(newWorkout);
+    saveToDatabase(DB);
+    return newWorkout;
+  } catch (error) {
+    throw { status: 500, message: error?.message || error };
+  }
 };
 
 const deleteWorkout = (id) => {
